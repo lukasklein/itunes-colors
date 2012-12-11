@@ -8,3 +8,7 @@
     height: 300px;
     float: right;
 }
+
+#frame .texts {
+    float: left;
+}

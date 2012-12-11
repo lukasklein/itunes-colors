@@ -3,21 +3,42 @@
   var ImageAnalyzer;
 
   ImageAnalyzer = function(image, frame) {
-    var findEdgeColor, init, isBlackOrWhite;
+    var bgcolor, detailColor, findEdgeColor, findTextColors, init, isBlackOrWhite, isContrastingColor, isDarkColor, isDistinct, primaryColor, secondaryColor;
+    bgcolor = primaryColor = secondaryColor = detailColor = null;
     init = function(image, frame) {
       var frm, img;
       frm = document.getElementById(frame);
       img = new Image();
       img.src = image;
       return img.onload = function() {
-        var color, ctx, cvs;
+        var ctx, cvs;
         cvs = document.createElement('canvas');
         cvs.width = img.width;
         cvs.height = img.height;
         ctx = cvs.getContext('2d');
         ctx.drawImage(img, 0, 0);
-        color = findEdgeColor(cvs, ctx);
-        return frm.style.background = 'rgb(' + color + ')';
+        bgcolor = findEdgeColor(cvs, ctx);
+        frm.style.background = 'rgb(' + bgcolor + ')';
+        return findTextColors(cvs, ctx, function() {
+          var dt, obj, pm, sd, _i, _j, _k, _len, _len1, _len2, _results;
+          pm = document.getElementsByClassName('primary');
+          for (_i = 0, _len = pm.length; _i < _len; _i++) {
+            obj = pm[_i];
+            obj.style.color = 'rgb(' + primaryColor + ')';
+          }
+          sd = document.getElementsByClassName('secondary');
+          for (_j = 0, _len1 = sd.length; _j < _len1; _j++) {
+            obj = sd[_j];
+            obj.style.color = 'rgb(' + secondaryColor + ')';
+          }
+          dt = document.getElementsByClassName('detail');
+          _results = [];
+          for (_k = 0, _len2 = dt.length; _k < _len2; _k++) {
+            obj = dt[_k];
+            _results.push(obj.style.color = 'rgb(' + detailColor + ')');
+          }
+          return _results;
+        });
       };
     };
     init(image, frame);
@@ -59,7 +80,56 @@
       }
       return proposedEdgeColor[0];
     };
-    return isBlackOrWhite = function(color) {
+    findTextColors = function(cvs, ctx, cb) {
+      var blue, color, colorCount, colors, column, count, curDark, findDarkTextColor, green, index, possibleColorsSorted, red, row, _i, _j, _k, _len, _ref, _ref1;
+      colors = ctx.getImageData(0, 0, cvs.width, cvs.height);
+      findDarkTextColor = isDarkColor(bgcolor);
+      colorCount = {};
+      for (row = _i = 0, _ref = cvs.height; 0 <= _ref ? _i < _ref : _i > _ref; row = 0 <= _ref ? ++_i : --_i) {
+        for (column = _j = 0, _ref1 = cvs.width; 0 <= _ref1 ? _j < _ref1 : _j > _ref1; column = 0 <= _ref1 ? ++_j : --_j) {
+          red = colors.data[(row * (cvs.width * 4)) + (column * 4)];
+          green = colors.data[((row * (cvs.width * 4)) + (column * 4)) + 1];
+          blue = colors.data[((row * (cvs.width * 4)) + (column * 4)) + 2];
+          index = red + ',' + green + ',' + blue;
+          if (!colorCount[index]) {
+            colorCount[index] = 0;
+          }
+          colorCount[index]++;
+        }
+      }
+      possibleColorsSorted = [];
+      for (color in colorCount) {
+        count = colorCount[color];
+        curDark = isDarkColor(color);
+        if (curDark === findDarkTextColor) {
+          possibleColorsSorted.push([color, count]);
+        }
+      }
+      possibleColorsSorted.sort(function(a, b) {
+        return b[1] - a[1];
+      });
+      for (_k = 0, _len = possibleColorsSorted.length; _k < _len; _k++) {
+        color = possibleColorsSorted[_k];
+        if (!primaryColor) {
+          if (isContrastingColor(color, bgcolor)) {
+            primaryColor = color[0];
+          }
+        } else if (!secondaryColor) {
+          if (isDistinct(primaryColor, color || isContrastingColor(color, bgcolor))) {
+            continue;
+          }
+          secondaryColor = color[0];
+        } else if (!detailColor) {
+          if (!isDistinct(secondaryColor, color || !isDistinct(primaryColor, color || !isContrastingColor(color, bgcolor)))) {
+            continue;
+          }
+          detailColor = color[0];
+          break;
+        }
+      }
+      return cb();
+    };
+    isBlackOrWhite = function(color) {
       var blue, green, red, splitted, tresholdBlack, tresholdWhite;
       splitted = color.split(',');
       red = splitted[0];
@@ -71,6 +141,58 @@
         return true;
       }
       if (red < tresholdBlack && green < tresholdBlack && blue < tresholdBlack) {
+        return true;
+      }
+      return false;
+    };
+    isDarkColor = function(color) {
+      var blue, green, lum, red, splitted;
+      if (color) {
+        splitted = color.split(',');
+        red = splitted[0] / 255;
+        green = splitted[1] / 255;
+        blue = splitted[2] / 255;
+        lum = 0.2126 * red + 0.7152 * green + 0.0722 * blue;
+        return lum < 0.5;
+      }
+      return false;
+    };
+    isContrastingColor = function(color1, color2) {
+      var blue1, blue2, contrast, green1, green2, lum1, lum2, red1, red2, splitted1, splitted2;
+      splitted1 = color1[0].split(',');
+      red1 = splitted1[0] / 255;
+      green1 = splitted1[1] / 255;
+      blue1 = splitted1[2] / 255;
+      lum1 = 0.2126 * red1 + 0.7152 * green1 + 0.0722 * blue1;
+      splitted2 = color2.split(',');
+      red2 = splitted2[0] / 255;
+      green2 = splitted2[1] / 255;
+      blue2 = splitted2[2] / 255;
+      lum2 = 0.2126 * red2 + 0.7152 * green2 + 0.0722 * blue2;
+      if (lum1 > lum2) {
+        contrast = (lum1 + 0.05) / (lum2 + 0.05);
+      } else {
+        contrast = (lum2 + 0.05) / (lum1 + 0.05);
+      }
+      return contrast > 1.6;
+    };
+    return isDistinct = function(color1, color2) {
+      var blue1, blue2, green1, green2, red1, red2, splitted1, splitted2, treshold;
+      splitted1 = color1[0].split(',');
+      red1 = splitted1[0] / 255;
+      green1 = splitted1[1] / 255;
+      blue1 = splitted1[2] / 255;
+      splitted2 = color2[0].split(',');
+      red2 = splitted2[0] / 255;
+      green2 = splitted2[1] / 255;
+      blue2 = splitted2[2] / 255;
+      treshold = 0.25;
+      if (Math.abs(red1 - red2) > treshold || Math.abs(green1 - green2) > treshold || Math.abs(blue1 - blue2) > treshold) {
+        if (Math.abs(red1 - green1) < .03 && Math.abs(red1 - blue1) < .03) {
+          if (Math.abs(red1 - green1) < .03 && Math.abs(red1 - blue1) < .03) {
+            return false;
+          }
+        }
         return true;
       }
       return false;
