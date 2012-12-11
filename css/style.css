@@ -1,0 +1,10 @@
+#frame {
+    width: 600px;
+    height: 400px;
+}
+
+#frame img {
+    width: 300px;
+    height: 300px;
+    float: right;
+}
