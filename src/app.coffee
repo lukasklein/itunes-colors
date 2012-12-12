@@ -1,7 +1,6 @@
-ImageAnalyzer = (image, frame) ->
+@ImageAnalyzer = (image, callback) ->
     bgcolor = primaryColor = secondaryColor = detailColor = null
-    init = (image, frame) ->
-        frm = document.getElementById(frame)
+    init = (image, callback) ->
         img = new Image()
         img.src = image
         img.onload = ->
@@ -12,22 +11,11 @@ ImageAnalyzer = (image, frame) ->
             ctx.drawImage img, 0, 0
 
             bgcolor = findEdgeColor cvs, ctx
-            frm.style.background = 'rgb(' + bgcolor + ')'
 
             findTextColors cvs, ctx, ->
-                pm = document.getElementsByClassName 'primary'
-                for obj in pm
-                    obj.style.color = 'rgb(' + primaryColor + ')'
-                
-                sd = document.getElementsByClassName 'secondary'
-                for obj in sd
-                    obj.style.color = 'rgb(' + secondaryColor + ')'
-                
-                dt = document.getElementsByClassName 'detail'
-                for obj in dt
-                    obj.style.color = 'rgb(' + detailColor + ')'
+                callback bgcolor, primaryColor, secondaryColor, detailColor
             
-    init image, frame
+    init image, callback
 
     findEdgeColor = (cvs, ctx) ->
         leftEdgeColors = ctx.getImageData 0, 0, 1, cvs.height
@@ -152,7 +140,7 @@ ImageAnalyzer = (image, frame) ->
             contrast = (lum1 + 0.05) / (lum2 + 0.05)
         else
             contrast = (lum2 + 0.05) / (lum1 + 0.05)
-
+        console.log contrast
         return contrast > 1.6
 
 
@@ -163,6 +151,18 @@ ImageAnalyzer = (image, frame) ->
         blue1 = splitted1[2] / 255
 
         splitted2 = color2[0].split(',')
+        red2 = splitted2[0] / 255
+        green2 = splitted2[1] / 255
+        blue2 = splitted2[2] / 255
+
+        treshold = 0.25
+
+        if Math.abs(red1 - red2) > treshold or Math.abs(green1 - green2) > treshold or Math.abs(blue1 - blue2) > treshold
+            if Math.abs(red1 - green1) < .03 and Math.abs(red1 - blue1) < .03
+                if Math.abs(red1 - green1) < .03 and Math.abs(red1 - blue1) < .03
+                    return false
+            return true
+        return false.split(',')
         red2 = splitted2[0] / 255
         green2 = splitted2[1] / 255
         blue2 = splitted2[2] / 255
