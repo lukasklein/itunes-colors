@@ -1,7 +1,6 @@
-ImageAnalyzer = (image, frame) ->
+@ImageAnalyzer = (image, callback) ->
     bgcolor = primaryColor = secondaryColor = detailColor = null
-    init = (image, frame) ->
-        frm = document.getElementById(frame)
+    init = (image, callback) ->
         img = new Image()
         img.src = image
         img.onload = ->
@@ -12,22 +11,11 @@ ImageAnalyzer = (image, frame) ->
             ctx.drawImage img, 0, 0
 
             bgcolor = findEdgeColor cvs, ctx
-            frm.style.background = 'rgb(' + bgcolor + ')'
 
             findTextColors cvs, ctx, ->
-                pm = document.getElementsByClassName 'primary'
-                for obj in pm
-                    obj.style.color = 'rgb(' + primaryColor + ')'
-                
-                sd = document.getElementsByClassName 'secondary'
-                for obj in sd
-                    obj.style.color = 'rgb(' + secondaryColor + ')'
-                
-                dt = document.getElementsByClassName 'detail'
-                for obj in dt
-                    obj.style.color = 'rgb(' + detailColor + ')'
+                callback bgcolor, primaryColor, secondaryColor, detailColor
             
-    init image, frame
+    init image, callback
 
     findEdgeColor = (cvs, ctx) ->
         leftEdgeColors = ctx.getImageData 0, 0, 1, cvs.height
@@ -152,7 +140,7 @@ ImageAnalyzer = (image, frame) ->
             contrast = (lum1 + 0.05) / (lum2 + 0.05)
         else
             contrast = (lum2 + 0.05) / (lum1 + 0.05)
-
+        console.log contrast
         return contrast > 1.6
 
 
@@ -175,7 +163,3 @@ ImageAnalyzer = (image, frame) ->
                     return false
             return true
         return false
-
-
-$ ->
-    color = ImageAnalyzer 'sample.jpg', 'frame'
