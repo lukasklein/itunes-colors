@@ -14,7 +14,7 @@
 
             findTextColors cvs, ctx, ->
                 callback bgcolor, primaryColor, secondaryColor, detailColor
-            
+
     init image, callback
 
     findEdgeColor = (cvs, ctx) ->
@@ -32,12 +32,12 @@
                 colorCount[index] = 0
             colorCount[index]++
 
-        
+
         sortedColorCount = []
         for color, count of colorCount
             if count > 2
                 sortedColorCount.push [color, count]
-        
+
         sortedColorCount.sort (a, b) ->
             b[1] - a[1]
 
@@ -135,14 +135,13 @@
         blue2 = splitted2[2] / 255
 
         lum2 = 0.2126 * red2 + 0.7152 * green2 + 0.0722 * blue2
-        
+
         if lum1 > lum2
             contrast = (lum1 + 0.05) / (lum2 + 0.05)
         else
             contrast = (lum2 + 0.05) / (lum1 + 0.05)
-        console.log contrast
-        return contrast > 1.6
 
+        return contrast > 1.6
 
     isDistinct = (color1, color2) ->
         splitted1 = color1[0].split(',')
@@ -162,12 +161,7 @@
                 if Math.abs(red1 - green1) < .03 and Math.abs(red1 - blue1) < .03
                     return false
             return true
-        return false.split(',')
-        red2 = splitted2[0] / 255
-        green2 = splitted2[1] / 255
-        blue2 = splitted2[2] / 255
-
-        treshold = 0.25
+        return false
 
         if Math.abs(red1 - red2) > treshold or Math.abs(green1 - green2) > treshold or Math.abs(blue1 - blue2) > treshold
             if Math.abs(red1 - green1) < .03 and Math.abs(red1 - blue1) < .03
@@ -175,7 +169,3 @@
                     return false
             return true
         return false
-
-
-$ ->
-    color = ImageAnalyzer 'sample.jpg', 'frame'
