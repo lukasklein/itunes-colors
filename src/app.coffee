@@ -44,7 +44,7 @@
         proposedEdgeColor = sortedColorCount[0]
         if isBlackOrWhite proposedEdgeColor[0]
             for nextProposedEdgeColor in sortedColorCount
-                if nextProposedEdgeColor[1] / proposedEdgeColor[1] > 0.4
+                if nextProposedEdgeColor[1] / proposedEdgeColor[1] > 0.3
                     if not isBlackOrWhite nextProposedEdgeColor[0]
                         proposedEdgeColor = nextProposedEdgeColor
                         break
@@ -54,7 +54,7 @@
     findTextColors = (cvs, ctx, cb) ->
         colors = ctx.getImageData 0, 0, cvs.width, cvs.height
 
-        findDarkTextColor = isDarkColor bgcolor
+        findDarkTextColor = not isDarkColor bgcolor
         colorCount = {}
         for row in [0...cvs.height]
             for column in [0...cvs.width]
@@ -80,14 +80,14 @@
 
         for color in possibleColorsSorted
             if not primaryColor
-                if isContrastingColor color, bgcolor
+                if isContrastingColor color[0], bgcolor
                     primaryColor = color[0]
             else if not secondaryColor
-                if isDistinct primaryColor, color or isContrastingColor color, bgcolor
+                if not isDistinct primaryColor, color[0] or not isContrastingColor color[0], bgcolor
                     continue
                 secondaryColor = color[0]
             else if not detailColor
-                if not isDistinct secondaryColor, color or not isDistinct primaryColor, color or not isContrastingColor color, bgcolor
+                if not isDistinct secondaryColor, color[0] or not isDistinct primaryColor, color[0] or not isContrastingColor color[0], bgcolor
                     continue
                 detailColor = color[0]
                 break
@@ -122,7 +122,7 @@
         return false
 
     isContrastingColor = (color1, color2) ->
-        splitted1 = color1[0].split(',')
+        splitted1 = color1.split(',')
         red1 = splitted1[0] / 255
         green1 = splitted1[1] / 255
         blue1 = splitted1[2] / 255
@@ -144,12 +144,12 @@
         return contrast > 1.6
 
     isDistinct = (color1, color2) ->
-        splitted1 = color1[0].split(',')
+        splitted1 = color1.split(',')
         red1 = splitted1[0] / 255
         green1 = splitted1[1] / 255
         blue1 = splitted1[2] / 255
 
-        splitted2 = color2[0].split(',')
+        splitted2 = color2.split(',')
         red2 = splitted2[0] / 255
         green2 = splitted2[1] / 255
         blue2 = splitted2[2] / 255
@@ -158,14 +158,7 @@
 
         if Math.abs(red1 - red2) > treshold or Math.abs(green1 - green2) > treshold or Math.abs(blue1 - blue2) > treshold
             if Math.abs(red1 - green1) < .03 and Math.abs(red1 - blue1) < .03
-                if Math.abs(red1 - green1) < .03 and Math.abs(red1 - blue1) < .03
-                    return false
-            return true
-        return false
-
-        if Math.abs(red1 - red2) > treshold or Math.abs(green1 - green2) > treshold or Math.abs(blue1 - blue2) > treshold
-            if Math.abs(red1 - green1) < .03 and Math.abs(red1 - blue1) < .03
-                if Math.abs(red1 - green1) < .03 and Math.abs(red1 - blue1) < .03
+                if Math.abs(red2 - green2) < .03 and Math.abs(red2 - blue2) < .03
                     return false
             return true
         return false
