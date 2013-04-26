@@ -95,12 +95,12 @@
             primaryColor = color[0];
           }
         } else if (!secondaryColor) {
-          if (!isDistinct(primaryColor, color[0] || !isContrastingColor(color[0], bgcolor))) {
+          if (!isDistinct(primaryColor, color[0]) || !isContrastingColor(color[0], bgcolor)) {
             continue;
           }
           secondaryColor = color[0];
         } else if (!detailColor) {
-          if (!isDistinct(secondaryColor, color[0] || !isDistinct(primaryColor, color[0] || !isContrastingColor(color[0], bgcolor)))) {
+          if (!isDistinct(secondaryColor, color[0]) || !isDistinct(primaryColor, color[0]) || !isContrastingColor(color[0], bgcolor)) {
             continue;
           }
           detailColor = color[0];

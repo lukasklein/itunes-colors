@@ -77,17 +77,16 @@
         possibleColorsSorted.sort (a, b) ->
             b[1] - a[1]
 
-
         for color in possibleColorsSorted
             if not primaryColor
                 if isContrastingColor color[0], bgcolor
                     primaryColor = color[0]
             else if not secondaryColor
-                if not isDistinct primaryColor, color[0] or not isContrastingColor color[0], bgcolor
+                if not isDistinct(primaryColor, color[0]) or not isContrastingColor(color[0], bgcolor)
                     continue
                 secondaryColor = color[0]
             else if not detailColor
-                if not isDistinct secondaryColor, color[0] or not isDistinct primaryColor, color[0] or not isContrastingColor color[0], bgcolor
+                if not isDistinct(secondaryColor, color[0]) or not isDistinct(primaryColor, color[0]) or not isContrastingColor(color[0], bgcolor)
                     continue
                 detailColor = color[0]
                 break
