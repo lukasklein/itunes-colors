@@ -61,7 +61,7 @@
       return proposedEdgeColor[0];
     };
     findTextColors = function(cvs, ctx, cb) {
-      var blue, color, colorCount, colors, column, count, curDark, findDarkTextColor, green, index, possibleColorsSorted, red, row, _i, _j, _k, _len, _ref, _ref1;
+      var blue, color, colorCount, colors, column, count, curDark, defaultColor, findDarkTextColor, green, index, possibleColorsSorted, red, row, _i, _j, _k, _len, _ref, _ref1;
       colors = ctx.getImageData(0, 0, cvs.width, cvs.height);
       findDarkTextColor = !isDarkColor(bgcolor);
       colorCount = {};
@@ -106,6 +106,16 @@
           detailColor = color[0];
           break;
         }
+      }
+      defaultColor = findDarkTextColor ? "0,0,0" : "255,255,255";
+      if (!primaryColor) {
+        primaryColor = defaultColor;
+      }
+      if (!secondaryColor) {
+        secondaryColor = defaultColor;
+      }
+      if (!detailColor) {
+        detailColor = defaultColor;
       }
       return cb();
     };

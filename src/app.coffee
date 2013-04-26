@@ -90,6 +90,12 @@
                     continue
                 detailColor = color[0]
                 break
+                
+        defaultColor = if findDarkTextColor then "0,0,0" else "255,255,255"       
+        primaryColor = defaultColor if not primaryColor
+        secondaryColor = defaultColor if not secondaryColor
+        detailColor = defaultColor if not detailColor
+                
         cb()
 
     isBlackOrWhite = (color) ->
